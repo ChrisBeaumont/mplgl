@@ -14,7 +14,7 @@ from matplotlib.figure import Figure
 
 from OpenGL import GL, GLU
 from PyQt4.QtOpenGL import QGLWidget
-from PyQt4.QtGui import QApplication
+from PyQt4.QtGui import QApplication, QMainWindow
 from PyQt4 import QtCore
 
 import numpy as np
@@ -157,6 +157,7 @@ if __name__ == "__main__":
     import sys
 
     app = QApplication([''])
+    mw = QMainWindow()
 
 
     f = Figure()
@@ -173,10 +174,11 @@ if __name__ == "__main__":
     y = np.random.normal(0, 1, sz)
     lines, = ax.plot(x, y, 'o', alpha=.1)
     lines2, = ax.plot(x, np.sin(x), 'ro', alpha = .2)
+
     tb = NavigationToolbar2QT(fc, None)
-    tb.show()
 
-    fc.show()
-    fc.draw()
+    mw.setCentralWidget(fc)
+    mw.addToolBar(tb)
 
+    mw.show()
     show.mainloop()
