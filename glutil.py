@@ -2,6 +2,7 @@ from OpenGL import GL, GLU
 import numpy as np
 
 def _apply_transform(transform):
+    """ Apply an MPL matrix to the current OpenGL matrix """
     v = transform.to_values()
     GL.glMultMatrixf([v[0], v[1], 0., 0.,
                       v[2], v[3], 0., 0.,
@@ -9,6 +10,7 @@ def _apply_transform(transform):
                       v[4], v[5], 0., 1.])
 
 def check_gl_errors(func):
+    """Assert an OpenGL error was not called"""
     def wrapper(*args, **kwargs):
         result = func(*args, **kwargs)
         assert GL.glGetError() == GL.GL_NO_ERROR
@@ -17,7 +19,7 @@ def check_gl_errors(func):
 
 
 def render_path(gc, path, transform, rgbFace):
-
+    """Renders a path"""
     GL.glLoadIdentity()
     _apply_transform(transform)
     GL.glVertexPointerf(path.vertices)
@@ -50,7 +52,7 @@ def render_path(gc, path, transform, rgbFace):
 
 def render_marker(gc, marker_path, marker_trans, path,
                   transform, rgbFace):
-
+    """Renders a marker"""
     GL.glLoadIdentity()
     _apply_transform(transform)
 
@@ -59,6 +61,8 @@ def render_marker(gc, marker_path, marker_trans, path,
     GL.glVertexPointerf(path.vertices)
     GL.glPointSize(3)
 
+
+    r = gc.get_clip_rectangle()
 
     if rgbFace is not None:
         r, g, b = rgbFace

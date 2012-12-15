@@ -1,27 +1,23 @@
+import sys
 from functools import partial
-from contextlib import contextmanager
 from time import time
 
-from matplotlib.backend_bases import (RendererBase, FigureCanvasBase,
-                                      GraphicsContextBase, Event, ShowBase)
-
-from matplotlib.backends.backend_qt4 import (TimerQT, Show, FigureCanvasQT,
-                                     FigureManagerQT, show,
-                                     NavigationToolbar2QT)
-
+from matplotlib.backend_bases import RendererBase
+from matplotlib.backends.backend_qt4 import (FigureCanvasQT,
+                                             show,
+                                             NavigationToolbar2QT)
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 
 from OpenGL import GL, GLU
-from PyQt4.QtOpenGL import QGLWidget
+
 from PyQt4.QtGui import QApplication, QMainWindow
 from PyQt4 import QtCore
+from PyQt4.QtOpenGL import QGLWidget
 
 import numpy as np
-import sys
-from fps import fps
 
-from glutil import (_apply_transform, check_gl_errors,
+from glutil import (check_gl_errors,
                     render_path, render_marker)
 
 
@@ -38,9 +34,7 @@ class OpenGLRenderer(RendererBase):
         self._draw_stack = []
 
     @check_gl_errors
-    @fps
     def display(self):
-        print "draw stack size: %i" % len(self._draw_stack)
         for render_call in self._draw_stack:
             render_call()
 
@@ -88,9 +82,12 @@ class FigureCanvasQTOpenGL(QGLWidget, FigureCanvasQT):
     def get_renderer(self):
         l, b, w, h = self.figure.bbox.bounds
         key = w, h, self.figure.dpi
-        try: self._lastKey, self.renderer
-        except AttributeError: need_new_renderer = True
-        else: need_new_renderer = (self._lastKey != key)
+        try:
+            self._lastKey, self.renderer
+        except AttributeError:
+            need_new_renderer = True
+        else:
+            need_new_renderer = (self._lastKey != key)
 
         if need_new_renderer:
             self.renderer = OpenGLRenderer(w, h, self.figure.dpi)
@@ -114,11 +111,9 @@ class FigureCanvasQTOpenGL(QGLWidget, FigureCanvasQT):
         t0 = time()
         GL.glClear(GL.GL_COLOR_BUFFER_BIT)
         self.renderer.display()
-        print 'render time: %ims' % ((time() - t0) * 1000)
-        print 'paintEnd'
+        print 'FPS: %i' % (1. / (time() - t0))
 
     def resizeGL(self, w, h):
-        print w, h
         self.width = int(w)
         self.height = int(h)
         GL.glViewport(0, 0, w, h)
@@ -144,21 +139,11 @@ class FigureCanvasQTOpenGL(QGLWidget, FigureCanvasQT):
     def drawRectangle(self, rect):
         pass
 
-    def paintEvent(self, e):
-        """
-        Copy the image from the Agg canvas to the qt.drawable.
-        In Qt, all drawing should be done inside of here when a widget is
-        shown onscreen.
-        """
-        QGLWidget.paintEvent(self, e)
-
 
 if __name__ == "__main__":
-    import sys
 
     app = QApplication([''])
     mw = QMainWindow()
-
 
     f = Figure()
 
@@ -169,11 +154,11 @@ if __name__ == "__main__":
 
     ax = f.add_subplot(111)
 
-    sz = 10**6
+    sz = 10 ** 6
     x = np.random.normal(0, 1, sz)
     y = np.random.normal(0, 1, sz)
     lines, = ax.plot(x, y, 'o', alpha=.1)
-    lines2, = ax.plot(x, np.sin(x), 'ro', alpha = .2)
+    lines2, = ax.plot(x, np.sin(x), 'ro', alpha=.2)
 
     tb = NavigationToolbar2QT(fc, None)
 
