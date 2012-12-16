@@ -114,9 +114,10 @@ class FigureCanvasQTOpenGL(QGLWidget, FigureCanvasQT):
         print 'FPS: %i' % (1. / (time() - t0))
 
     def resizeGL(self, w, h):
+        print 'resize'
         self.width = int(w)
         self.height = int(h)
-        GL.glViewport(0, 0, w, h)
+        GL.glViewport(0, 0, self.width, self.height)
         self._set_projections()
 
     def _set_projections(self):
@@ -147,14 +148,18 @@ if __name__ == "__main__":
 
     f = Figure()
 
-    if '--old' not in sys.argv:
+    if '--agg' not in sys.argv:
         fc = FigureCanvasQTOpenGL(f)
     else:
         fc = FigureCanvasQTAgg(f)
 
     ax = f.add_subplot(111)
 
-    sz = 10 ** 6
+    if '--size' in sys.argv:
+        sz = int(sys.argv[-1])
+    else:
+        sz = 10 ** 6
+
     x = np.random.normal(0, 1, sz)
     y = np.random.normal(0, 1, sz)
     lines, = ax.plot(x, y, 'o', alpha=.1)
